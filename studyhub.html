@@ -1,0 +1,257 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Futuristic Study Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { text-align: center; color: #00e5ff; margin-bottom: 30px; text-shadow: 0 0 15px #00e5ff; }
+    .card { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.6); transition: transform 0.3s, box-shadow 0.3s; }
+    .card:hover { transform: scale(1.02); box-shadow: 0 0 30px #00e5ff; }
+    .chapter, .file-item { background: rgba(255,255,255,0.08); margin: 10px 0; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; }
+    button, label { background: linear-gradient(90deg, #00e5ff, #1de9b6); border: none; padding: 10px 18px; margin: 3px; border-radius: 12px; cursor: pointer; font-weight: bold; color: #000; transition: transform 0.2s, box-shadow 0.2s; }
+    button:hover, label:hover { transform: scale(1.05); box-shadow: 0 0 12px #00e5ff; }
+    input[type="file"] { display: none; }
+    .file-list { margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+    .file-card { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 0 15px rgba(0,229,255,0.4); transition: transform 0.3s, box-shadow 0.3s; }
+    .file-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px #00e5ff; }
+    .file-card i { font-size: 50px; margin-bottom: 12px; color: #00e5ff; text-shadow: 0 0 15px #00e5ff; }
+    .file-card p { margin: 8px 0; font-size: 14px; color: #ddd; }
+    .file-card button { margin-top: 10px; display: block; width: 100%; }
+    /* Modal styles */
+    #modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+    #modal-content { width: 90%; height: 90%; background: rgba(0,0,0,0.95); border-radius: 20px; position: relative; overflow: hidden; box-shadow: 0 0 25px #00e5ff; }
+    #modal iframe { width: 100%; height: 100%; border: none; }
+    #modal-close { position: absolute; top: 10px; right: 15px; font-size: 30px; cursor: pointer; color: #00e5ff; transition: transform 0.2s, color 0.2s; }
+    #modal-close:hover { transform: scale(1.2); color: #1de9b6; }
+    .chapter-list { display: none; margin-top: 10px; }
+    .done { background: #00e676 !important; color: #000 !important; }
+    .status { font-size: 13px; color: #00e676; }
+  </style>
+</head>
+<body>
+<h1><i class="fa-solid fa-graduation-cap"></i> PCB_11TH_NASEEM</h1>
+  <!-- Bismillah text -->
+  <div class="bismillah">﷽</div>
+
+<div style="text-align:center; margin-bottom:20px;">
+  <a href="index.html" class="btn"><i class="fa-solid fa-house"></i> Back to Home</a>
+</div>
+<div id="subjects"></div>
+
+<div class="card">
+  <h2><i class="fa-solid fa-upload"></i> Upload Multiple Files (PDF / HTML)</h2>
+  <input type="file" id="multiUpload" multiple accept=".pdf,.html">
+  <label for="multiUpload"><i class="fa-solid fa-plus"></i> Add Files</label>
+  <div id="multiFileList" class="file-list"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <span id="modal-close"><i class="fa-solid fa-xmark"></i></span>
+    <iframe id="modal-frame"></iframe>
+  </div>
+</div>
+<!-- New Play/Pause button -->
+  <button id="toggleAudio" class="btn"><i class="fa-solid fa-play"></i> Play Bismillah</button>
+<!-- Audio -->
+  <audio id="bismillahAudio">
+    <source src="bismillah.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+<script>
+     const audio = document.getElementById("bismillahAudio");
+    const toggleBtn = document.getElementById("toggleAudio");
+
+    toggleBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Bismillah';
+      } else {
+        audio.pause();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play Bismillah';
+      }
+    });
+const subjects = [
+  { name: "Physics", icon: "fa-atom", chapters: ["Physical_World","Units_and_Measurements","Motion_in_a_Straight_Line","Motion_in_a_Plane","Laws_of_Motion"] },
+  { name: "Chemistry", icon: "fa-flask", chapters: ["1_Some_Basic_Concepts_of_Chemistry","2_Structure_of_Atom","3_Classification_of_Elements_and_Periodicity", "4_Chemical_Bonding"] },
+  { name: "Biology", icon: "fa-leaf", chapters: ["The_Living_World","Biological_Classification","Plant_Kingdom"] },
+  { name: "Mathematics", icon: "fa-square-root-alt", chapters: ["Sets","Relations_and_Functions","Trigonometric_Functions"] }
+];
+
+const container = document.getElementById("subjects");
+let storedFiles = JSON.parse(localStorage.getItem("storedFiles")) || {};
+let chapterProgress = JSON.parse(localStorage.getItem("chapterProgress")) || {};
+
+// Modal
+const modal = document.getElementById("modal");
+const modalFrame = document.getElementById("modal-frame");
+const modalClose = document.getElementById("modal-close");
+function openModal(data) { modal.style.display = "flex"; modalFrame.src = data; }
+modalClose.onclick = () => { modal.style.display = "none"; modalFrame.src = ""; };
+
+// Render subjects
+subjects.forEach(subject => {
+  const card = document.createElement("div"); card.className="card";
+  const title = document.createElement("h2");
+  title.innerHTML=`<i class="fa-solid ${subject.icon}"></i> ${subject.name}`;
+  card.appendChild(title);
+
+  const toggleBtn=document.createElement("button");
+  toggleBtn.textContent="View Chapters";
+  card.appendChild(toggleBtn);
+
+  const chapterList=document.createElement("div"); chapterList.className="chapter-list";
+
+  subject.chapters.forEach(chapter=>{
+    const chapDiv=document.createElement("div"); chapDiv.className="chapter";
+    const chapTitle=document.createElement("h3"); chapTitle.textContent=chapter.replace(/_/g," ");
+    
+    const uploadInput=document.createElement("input"); 
+    uploadInput.type="file"; 
+    uploadInput.accept=".pdf"; 
+    uploadInput.id=`upload-${subject.name}-${chapter}`;
+    
+    const uploadLabel=document.createElement("label"); 
+    uploadLabel.setAttribute("for", uploadInput.id); 
+    uploadLabel.innerHTML=`<i class="fa-solid fa-upload"></i> Upload PDF`;
+    
+    const openBtn=document.createElement("button"); 
+    openBtn.innerHTML=`<i class="fa-solid fa-eye"></i> Open PDF`;
+    
+    const deleteBtn=document.createElement("button");
+    deleteBtn.innerHTML=`<i class="fa-solid fa-trash"></i> Delete PDF`;
+    
+    const doneBtn=document.createElement("button");
+    doneBtn.textContent="Mark as Done";
+    
+    const status=document.createElement("div");
+    status.className="status";
+    
+    const key=`${subject.name}-${chapter}`;
+
+    // Restore progress
+    if (chapterProgress[key]==="done") {
+      doneBtn.classList.add("done");
+      doneBtn.textContent="Completed ✅";
+      status.innerText="✔ Marked as Done";
+    }
+
+    // Upload
+    uploadInput.addEventListener("change",e=>{
+      const file=e.target.files[0];
+      if(file){ const reader=new FileReader();
+        reader.onload=ev=>{
+          storedFiles[key]=ev.target.result;
+          localStorage.setItem("storedFiles",JSON.stringify(storedFiles));
+        }; reader.readAsDataURL(file);
+      }
+    });
+
+    // Open
+    openBtn.addEventListener("click",()=>{ 
+      if(storedFiles[key]) openModal(storedFiles[key]); 
+      else openModal(`pdfs/${subject.name}/${chapter}.pdf`);
+    });
+
+    // Delete PDF
+    deleteBtn.addEventListener("click",()=>{
+      if(storedFiles[key]){
+        delete storedFiles[key];
+        localStorage.setItem("storedFiles",JSON.stringify(storedFiles));
+        alert("Uploaded PDF removed. Preloaded PDF will open instead.");
+      } else {
+        alert("No uploaded file to delete.");
+      }
+    });
+
+    // Mark as done
+    doneBtn.addEventListener("click",()=>{
+      if(chapterProgress[key]==="done"){
+        delete chapterProgress[key];
+        localStorage.setItem("chapterProgress",JSON.stringify(chapterProgress));
+        doneBtn.classList.remove("done");
+        doneBtn.textContent="Mark as Done";
+        status.innerText="";
+      } else {
+        chapterProgress[key]="done";
+        localStorage.setItem("chapterProgress",JSON.stringify(chapterProgress));
+        doneBtn.classList.add("done");
+        doneBtn.textContent="Completed ✅";
+        status.innerText="✔ Marked as Done";
+      }
+    });
+
+    chapDiv.appendChild(chapTitle); 
+    chapDiv.appendChild(uploadInput); 
+    chapDiv.appendChild(uploadLabel); 
+    chapDiv.appendChild(openBtn); 
+    chapDiv.appendChild(deleteBtn); 
+    chapDiv.appendChild(doneBtn); 
+    chapDiv.appendChild(status);
+    chapterList.appendChild(chapDiv);
+  });
+
+  toggleBtn.addEventListener("click",()=>{
+    chapterList.style.display=chapterList.style.display==="block"?"none":"block";
+    toggleBtn.textContent=chapterList.style.display==="block"?"Hide Chapters":"View Chapters";
+  });
+
+  card.appendChild(chapterList);
+  container.appendChild(card);
+});
+
+// Multi Upload
+const multiUpload = document.getElementById("multiUpload");
+const multiFileList = document.getElementById("multiFileList");
+
+function renderMultiFiles(){
+  multiFileList.innerHTML="";
+  Object.keys(storedFiles).forEach(key=>{
+    if(key.startsWith("multi-")){
+      const fileName=key.replace("multi-","");
+      const ext=fileName.split(".").pop().toLowerCase();
+      const icon=ext==="pdf"?"fa-file-pdf":"fa-code";
+      const color=ext==="pdf"?"#ff5252":"#29b6f6";
+      const fileCard=document.createElement("div"); fileCard.className="file-card";
+      fileCard.innerHTML=`
+        <i class="fa-solid ${icon}" style="color:${color}"></i>
+        <p>${fileName}</p>
+        <button onclick="openModal('${storedFiles[key]}')"><i class="fa-solid fa-eye"></i> Open</button>
+        <button onclick="deleteMultiFile('${key}')"><i class="fa-solid fa-trash"></i> Delete</button>
+      `;
+      multiFileList.appendChild(fileCard);
+    }
+  });
+}
+multiUpload.addEventListener("change",e=>{
+  [...e.target.files].forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      storedFiles["multi-"+file.name]=ev.target.result;
+      localStorage.setItem("storedFiles",JSON.stringify(storedFiles));
+      renderMultiFiles();
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function deleteMultiFile(key){
+  delete storedFiles[key];
+  localStorage.setItem("storedFiles",JSON.stringify(storedFiles));
+  renderMultiFiles();
+}
+
+renderMultiFiles();
+</script>
+</body>
+</html>

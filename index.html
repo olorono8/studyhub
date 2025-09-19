@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome - Futuristic Study Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      text-align: center;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, #00e5ff, #1de9b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(0,229,255,0.8);
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #ddd;
+    }
+    .photo {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 25px;
+      box-shadow: 0 0 25px #00e5ff;
+    }
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .btn {
+      background: linear-gradient(90deg, #00e5ff, #1de9b6);
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      margin: 10px;
+    }
+    .btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #00e5ff;
+    }
+
+    /* Bismillah styling */
+    .bismillah {
+      font-size: 2rem;
+      margin: 20px 0;
+      font-family: "Amiri", serif;
+      background: linear-gradient(90deg, #ffd700, #ff9800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(255,215,0,0.7);
+    }
+  </style>
+</head>
+<body>
+  <div class="photo">
+    <img src="naseem.jpg" alt="My Photo">
+  </div>
+
+  <!-- Bismillah text -->
+  <div class="bismillah">﷽</div>
+
+  <h1>Welcome to My Study Hub</h1>
+  <p>My personal futuristic learning platform</p>
+
+  <!-- New Play/Pause button -->
+  <button id="toggleAudio" class="btn"><i class="fa-solid fa-play"></i> Play Bismillah</button>
+
+  <a href="studyhub.html" class="btn"><i class="fa-solid fa-graduation-cap"></i> Enter Hub</a>
+
+  <!-- Audio -->
+  <audio id="bismillahAudio">
+    <source src="bismillah.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const audio = document.getElementById("bismillahAudio");
+    const toggleBtn = document.getElementById("toggleAudio");
+
+    toggleBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Bismillah';
+      } else {
+        audio.pause();
+        toggleBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play Bismillah';
+      }
+    });
+  </script>
+</body>
+</html>
